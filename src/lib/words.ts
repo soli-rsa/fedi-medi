@@ -1,9 +1,9 @@
 import { TileState } from './types';
 
 const WORD_LIST = [
-  'REACT', 'REDUX', 'HOOKS', 'STATE', 'PROPS',
-  'QUERY', 'FETCH', 'ASYNC', 'AWAIT', 'CLASS',
-  'CONST', 'ARRAY', 'STACK', 'QUEUE', 'GRAPH'
+  'HEART', 'LUNGS', 'BRAIN', 'SPINE', 'BLOOD',
+  'PULSE', 'FEVER', 'COUGH', 'VIRUS', 'WOUND',
+  'BONES', 'CELLS', 'NERVE', 'JOINT', 'SCALP'
 ];
 
 export const getRandomWord = () => {
