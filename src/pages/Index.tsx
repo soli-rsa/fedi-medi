@@ -119,8 +119,19 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-between py-8">
-      <h1 className="text-4xl font-bold mb-8">Medical Wordle</h1>
+      <h1 className="text-4xl font-bold mb-4">Medical Wordle</h1>
       
+      <div className="max-w-md text-center mb-8 px-4">
+        <p className="text-muted-foreground mb-2">
+          Guess the medical term in 6 tries. Each guess must be a valid 5-letter medical word.
+        </p>
+        <div className="text-sm text-muted-foreground space-y-1">
+          <p>🟩 Green tile means the letter is correct and in the right spot</p>
+          <p>🟨 Yellow tile means the letter is in the word but in the wrong spot</p>
+          <p>⬜️ Gray tile means the letter is not in the word</p>
+        </div>
+      </div>
+
       <div className="flex flex-col items-center gap-4">
         <div className="text-sm text-muted-foreground">
           <p>Games Played: {stats.gamesPlayed}</p>
