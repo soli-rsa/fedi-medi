@@ -1,3 +1,5 @@
+import { TileState } from './types';
+
 const WORD_LIST = [
   'REACT', 'REDUX', 'HOOKS', 'STATE', 'PROPS',
   'QUERY', 'FETCH', 'ASYNC', 'AWAIT', 'CLASS',
