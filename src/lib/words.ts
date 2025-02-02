@@ -1,43 +1,37 @@
-import { TileState } from './types';
+import { TileState } from "./types";
+import { getRandomWord as getMedicalWord, isValidWord as isMedicalWord } from "./medical-terms";
 
-const WORD_LIST = [
-  'HEART', 'LUNGS', 'BRAIN', 'SPINE', 'BLOOD',
-  'PULSE', 'FEVER', 'COUGH', 'VIRUS', 'WOUND',
-  'BONES', 'CELLS', 'NERVE', 'JOINT', 'SCALP'
-];
-
-export const getRandomWord = () => {
-  return WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)];
+export const getRandomWord = (): string => {
+  return getMedicalWord();
 };
 
-export const isValidWord = (word: string) => {
-  return WORD_LIST.includes(word.toUpperCase());
+export const isValidWord = (word: string): boolean => {
+  return isMedicalWord(word);
 };
 
 export const evaluateGuess = (guess: string, answer: string): TileState[] => {
-  const result: TileState[] = Array(5).fill('absent');
-  const answerChars = answer.split('');
-  const guessChars = guess.toUpperCase().split('');
+  const evaluation: TileState[] = Array(5).fill('absent');
+  const answerLetters = answer.split('');
+  const guessLetters = guess.toUpperCase().split('');
 
   // First pass: mark correct letters
-  guessChars.forEach((char, i) => {
-    if (char === answerChars[i]) {
-      result[i] = 'correct';
-      answerChars[i] = '#';
-      guessChars[i] = '#';
+  guessLetters.forEach((letter, i) => {
+    if (letter === answerLetters[i]) {
+      evaluation[i] = 'correct';
+      answerLetters[i] = '#'; // Mark as used
     }
   });
 
   // Second pass: mark present letters
-  guessChars.forEach((char, i) => {
-    if (char !== '#') {
-      const answerIndex = answerChars.indexOf(char);
-      if (answerIndex !== -1) {
-        result[i] = 'present';
-        answerChars[answerIndex] = '#';
+  guessLetters.forEach((letter, i) => {
+    if (evaluation[i] !== 'correct') {
+      const index = answerLetters.indexOf(letter);
+      if (index !== -1) {
+        evaluation[i] = 'present';
+        answerLetters[index] = '#'; // Mark as used
       }
     }
   });
 
-  return result;
+  return evaluation;
 };
