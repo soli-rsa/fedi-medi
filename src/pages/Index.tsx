@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import GameBoard from "@/components/GameBoard";
 import Keyboard from "@/components/Keyboard";
 import { getRandomWord, isValidWord, evaluateGuess } from "@/lib/words";
-import { GameState, KeyState } from "@/lib/types";
+import { GameState, KeyState, WordCategory } from "@/lib/types";
 import { loadStats, updateStats } from "@/lib/statistics";
 import { getWordDefinition } from "@/lib/medical-terms";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 const Index = () => {
   const { toast } = useToast();
-  const [answer, setAnswer] = useState(() => getRandomWord());
+  const [gameMode, setGameMode] = useState<WordCategory>('medical');
+  const [answer, setAnswer] = useState(() => getRandomWord(gameMode));
   const [gameState, setGameState] = useState<GameState>({
     guesses: [],
     currentGuess: '',
@@ -19,11 +24,35 @@ const Index = () => {
   const [stats, setStats] = useState(loadStats());
   const [clue, setClue] = useState("");
 
+  const startNewGame = () => {
+    const newWord = getRandomWord(gameMode);
+    setAnswer(newWord);
+    setGameState({
+      guesses: [],
+      currentGuess: '',
+      gameStatus: 'playing',
+    });
+    setKeyStates([]);
+    const definition = getWordDefinition(newWord);
+    setClue(definition || "");
+    console.log("New game started with word:", newWord, "Definition:", definition);
+  };
+
   useEffect(() => {
     const definition = getWordDefinition(answer);
     setClue(definition || "");
     console.log("Current word:", answer, "Definition:", definition);
   }, [answer]);
+
+  const handleModeChange = (checked: boolean) => {
+    const newMode = checked ? 'general' : 'medical';
+    setGameMode(newMode);
+    toast({
+      title: `Switched to ${newMode} mode`,
+      description: `Now playing with ${newMode} terms`,
+    });
+    startNewGame();
+  };
 
   const addLetter = (letter: string) => {
     if (gameState.currentGuess.length < 5 && gameState.gameStatus === 'playing') {
@@ -127,7 +156,29 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-between py-4 px-2 sm:py-8">
       <div className="w-full max-w-lg mx-auto">
-        <h1 className="text-2xl sm:text-4xl font-bold mb-2 sm:mb-4">Medical Wordle</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl sm:text-4xl font-bold">Medical Wordle</h1>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="game-mode"
+                checked={gameMode === 'general'}
+                onCheckedChange={handleModeChange}
+              />
+              <Label htmlFor="game-mode">
+                {gameMode === 'medical' ? 'Medical Mode' : 'General Mode'}
+              </Label>
+            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={startNewGame}
+              className="h-8 w-8"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
         
         <div className="bg-card rounded-lg p-4 mb-4 shadow-lg">
           <h2 className="text-lg font-semibold mb-2">Clue:</h2>
@@ -136,7 +187,7 @@ const Index = () => {
 
         <div className="max-w-md text-center mb-4 px-2 sm:px-4">
           <p className="text-sm sm:text-base text-muted-foreground mb-2">
-            Guess the medical term in 6 tries. Each guess must be a valid 5-letter medical word.
+            Guess the {gameMode} term in 6 tries. Each guess must be a valid 5-letter word.
           </p>
           <div className="text-xs sm:text-sm text-muted-foreground space-y-1">
             <p>🟩 Green tile means the letter is correct and in the right spot</p>
