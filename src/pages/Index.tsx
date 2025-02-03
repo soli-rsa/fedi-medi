@@ -9,6 +9,7 @@ import { useWordleGame } from "@/hooks/useWordleGame";
 const Index = () => {
   const {
     gameMode,
+    answer,
     gameState,
     keyStates,
     stats,
