@@ -1,9 +1,11 @@
+import { Word } from "./types";
+
 interface MedicalTerm {
   word: string;
   definition: string;
 }
 
-export const medicalTerms: MedicalTerm[] = [
+const medicalTermsList: MedicalTerm[] = [
   { word: "VIRUS", definition: "A pathogen that causes infectious diseases" },
   { word: "HEART", definition: "A muscular organ that pumps blood throughout the body" },
   { word: "BLOOD", definition: "A fluid that transports oxygen and nutrients to cells" },
@@ -67,6 +69,9 @@ export const medicalTerms: MedicalTerm[] = [
   { word: "SEPTI", definition: "Relating to infection or the presence of harmful bacteria" }
 ];
 
+export const medicalTerms: MedicalTerm[] = medicalTermsList;
+
+// These exports are kept for backward compatibility
 export const getRandomWord = (): string => {
   const randomIndex = Math.floor(Math.random() * medicalTerms.length);
   return medicalTerms[randomIndex].word;

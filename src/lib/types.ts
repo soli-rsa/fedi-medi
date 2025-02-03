@@ -10,3 +10,13 @@ export type KeyState = {
   key: string;
   state: TileState;
 };
+
+export type WordCategory = 'medical' | 'general';
+
+export interface Word {
+  word: string;
+  definition: string;
+  category: WordCategory;
+}
+
+export type WordDifficulty = 'easy' | 'moderate' | 'hard';
