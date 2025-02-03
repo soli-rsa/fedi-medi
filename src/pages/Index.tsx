@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import GameBoard from "@/components/GameBoard";
 import Keyboard from "@/components/Keyboard";
+import GameHeader from "@/components/GameHeader";
+import GameClue from "@/components/GameClue";
+import GameInstructions from "@/components/GameInstructions";
+import GameStats from "@/components/GameStats";
 import { getRandomWord, isValidWord, evaluateGuess } from "@/lib/words";
 import { GameState, KeyState, WordCategory } from "@/lib/types";
 import { loadStats, updateStats } from "@/lib/statistics";
 import { getWordDefinition } from "@/lib/medical-terms";
-import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
 
 const Index = () => {
   const { toast } = useToast();
@@ -156,53 +156,23 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-between py-4 px-2 sm:py-8">
       <div className="w-full max-w-lg mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl sm:text-4xl font-bold">Medical Wordle</h1>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="game-mode"
-                checked={gameMode === 'general'}
-                onCheckedChange={handleModeChange}
-              />
-              <Label htmlFor="game-mode">
-                {gameMode === 'medical' ? 'Medical Mode' : 'General Mode'}
-              </Label>
-            </div>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={startNewGame}
-              className="h-8 w-8"
-            >
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <GameHeader
+          gameMode={gameMode}
+          onModeChange={handleModeChange}
+          onNewGame={startNewGame}
+        />
         
-        <div className="bg-card rounded-lg p-4 mb-4 shadow-lg">
-          <h2 className="text-lg font-semibold mb-2">Clue:</h2>
-          <p className="text-muted-foreground text-sm sm:text-base">{clue}</p>
-        </div>
+        <GameClue clue={clue} />
 
-        <div className="max-w-md text-center mb-4 px-2 sm:px-4">
-          <p className="text-sm sm:text-base text-muted-foreground mb-2">
-            Guess the {gameMode} term in 6 tries. Each guess must be a valid 5-letter word.
-          </p>
-          <div className="text-xs sm:text-sm text-muted-foreground space-y-1">
-            <p>🟩 Green tile means the letter is correct and in the right spot</p>
-            <p>🟨 Yellow tile means the letter is in the word but in the wrong spot</p>
-            <p>⬜️ Gray tile means the letter is not in the word</p>
-          </div>
-        </div>
+        <GameInstructions gameMode={gameMode} />
 
         <div className="flex flex-col items-center gap-4">
-          <div className="text-xs sm:text-sm text-muted-foreground grid grid-cols-2 gap-2">
-            <p>Games Played: {stats.gamesPlayed}</p>
-            <p>Win Rate: {stats.gamesPlayed > 0 ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) : 0}%</p>
-            <p>Current Streak: {stats.currentStreak}</p>
-            <p>Max Streak: {stats.maxStreak}</p>
-          </div>
+          <GameStats
+            gamesPlayed={stats.gamesPlayed}
+            gamesWon={stats.gamesWon}
+            currentStreak={stats.currentStreak}
+            maxStreak={stats.maxStreak}
+          />
           
           <GameBoard
             guesses={gameState.guesses}
