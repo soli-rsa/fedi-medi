@@ -11,12 +11,28 @@ export type KeyState = {
   state: TileState;
 };
 
-export type WordCategory = 'medical' | 'general';
+export type WordCategory = 'medical' | 'general' | 'mixed';
 
-export interface Word {
+export interface WordEntry {
   word: string;
-  definition: string;
   category: WordCategory;
+  definition: string;
 }
 
-export type WordDifficulty = 'easy' | 'moderate' | 'hard';
+export interface DictionaryResponse {
+  word: string;
+  meanings: {
+    partOfSpeech: string;
+    definitions: {
+      definition: string;
+    }[];
+  }[];
+}
+
+export interface GameStats {
+  gamesPlayed: number;
+  gamesWon: number;
+  currentStreak: number;
+  maxStreak: number;
+  guessDistribution: Record<number, number>;
+}

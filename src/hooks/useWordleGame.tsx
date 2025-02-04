@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { getRandomWord, isValidWord, evaluateGuess } from "@/lib/words";
-import { GameState, KeyState, WordCategory } from "@/lib/types";
+import { wordService } from "@/lib/words";
+import { GameState, KeyState, WordCategory, WordEntry } from "@/lib/types";
 import { loadStats, updateStats } from "@/lib/statistics";
-import { getWordDefinition } from "@/lib/medical-terms";
 
 export const useWordleGame = () => {
   const { toast } = useToast();
   const [gameMode, setGameMode] = useState<WordCategory>('medical');
-  const [answer, setAnswer] = useState(() => getRandomWord(gameMode));
+  const [currentWord, setCurrentWord] = useState<WordEntry>(() => wordService.getRandomWord(gameMode));
   const [gameState, setGameState] = useState<GameState>({
     guesses: [],
     currentGuess: '',
@@ -16,20 +15,17 @@ export const useWordleGame = () => {
   });
   const [keyStates, setKeyStates] = useState<KeyState[]>([]);
   const [stats, setStats] = useState(loadStats());
-  const [clue, setClue] = useState("");
 
   const startNewGame = () => {
-    const newWord = getRandomWord(gameMode);
-    setAnswer(newWord);
+    const newWord = wordService.getRandomWord(gameMode);
+    setCurrentWord(newWord);
     setGameState({
       guesses: [],
       currentGuess: '',
       gameStatus: 'playing',
     });
     setKeyStates([]);
-    const definition = getWordDefinition(newWord);
-    setClue(definition || "");
-    console.log("New game started with word:", newWord, "Definition:", definition);
+    console.log("New game started with word:", newWord.word, "Definition:", newWord.definition);
   };
 
   const handleModeChange = (checked: boolean) => {
@@ -67,7 +63,7 @@ export const useWordleGame = () => {
       return;
     }
 
-    if (!isValidWord(gameState.currentGuess)) {
+    if (!wordService.isValidWord(gameState.currentGuess)) {
       toast({
         title: "Invalid word",
         description: "Please enter a valid medical term",
@@ -77,7 +73,7 @@ export const useWordleGame = () => {
     }
 
     const newGuesses = [...gameState.guesses, gameState.currentGuess.toUpperCase()];
-    const won = gameState.currentGuess.toUpperCase() === answer;
+    const won = gameState.currentGuess.toUpperCase() === currentWord.word;
     const lost = newGuesses.length === 6;
 
     setGameState(prev => ({
@@ -91,19 +87,19 @@ export const useWordleGame = () => {
       setStats(newStats);
       toast({
         title: "Congratulations!",
-        description: `You found the medical term in ${newGuesses.length} tries!`,
+        description: `You found the word in ${newGuesses.length} tries!`,
       });
     } else if (lost) {
       const newStats = updateStats(false, 6);
       setStats(newStats);
       toast({
         title: "Game Over",
-        description: `The medical term was ${answer}`,
+        description: `The word was ${currentWord.word}`,
         variant: "destructive",
       });
     }
 
-    const evaluation = evaluateGuess(gameState.currentGuess, answer);
+    const evaluation = wordService.evaluateGuess(gameState.currentGuess, currentWord.word);
     const newKeyStates = [...keyStates];
     gameState.currentGuess.toUpperCase().split('').forEach((letter, i) => {
       const existingKeyState = newKeyStates.find(k => k.key === letter);
@@ -127,12 +123,6 @@ export const useWordleGame = () => {
   };
 
   useEffect(() => {
-    const definition = getWordDefinition(answer);
-    setClue(definition || "");
-    console.log("Current word:", answer, "Definition:", definition);
-  }, [answer]);
-
-  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
         handleKey('ENTER');
@@ -149,11 +139,11 @@ export const useWordleGame = () => {
 
   return {
     gameMode,
-    answer,
+    answer: currentWord.word,
     gameState,
     keyStates,
     stats,
-    clue,
+    clue: currentWord.definition,
     handleModeChange,
     handleKey,
     startNewGame
