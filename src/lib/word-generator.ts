@@ -9,43 +9,34 @@ class WordGenerator {
 
   constructor() {
     this.usedWords = new Set();
-    this.medicalWords = medicalTerms.map(term => ({
-      word: term.word,
-      definition: term.definition,
-      category: 'medical' as WordCategory
-    }));
+    this.medicalWords = medicalTerms;
     this.generalWords = generalWords;
+    console.log("WordGenerator initialized with", this.medicalWords.length, "medical words and", this.generalWords.length, "general words");
   }
 
-  generateWord(category: WordCategory | 'mixed' = 'medical', difficulty: WordDifficulty = 'moderate'): Word {
-    let sourceList = category === 'medical' ? this.medicalWords :
-                    category === 'general' ? this.generalWords :
-                    [...this.medicalWords, ...this.generalWords];
-
-    // Filter by difficulty if needed
+  generateWord(category: WordCategory = 'medical', difficulty: WordDifficulty = 'moderate'): Word {
+    console.log("Generating word for category:", category, "with difficulty:", difficulty);
+    
+    let sourceList = category === 'medical' ? this.medicalWords : this.generalWords;
     sourceList = this.filterByDifficulty(sourceList, difficulty);
-
-    // Get unused words
+    
     const availableWords = sourceList.filter(word => !this.usedWords.has(word.word));
-
-    // If all words have been used, reset the used words set
+    
     if (availableWords.length === 0) {
+      console.log("No available words, resetting used words");
       this.usedWords.clear();
       return this.generateWord(category, difficulty);
     }
 
-    // Select a random word
     const randomIndex = Math.floor(Math.random() * availableWords.length);
     const selectedWord = availableWords[randomIndex];
-
-    // Mark as used
     this.usedWords.add(selectedWord.word);
-
+    
+    console.log("Selected word:", selectedWord.word, "from category:", selectedWord.category);
     return selectedWord;
   }
 
   private filterByDifficulty(words: Word[], difficulty: WordDifficulty): Word[] {
-    // Simple difficulty implementation based on word length and common letters
     const commonLetters = new Set(['E', 'A', 'R', 'I', 'O', 'T', 'N', 'S', 'L']);
     
     return words.filter(word => {
@@ -80,8 +71,8 @@ class WordGenerator {
 // Create a singleton instance
 const wordGenerator = new WordGenerator();
 
-export const getRandomWord = (): string => {
-  const word = wordGenerator.generateWord();
+export const getRandomWord = (category: WordCategory = 'medical'): string => {
+  const word = wordGenerator.generateWord(category);
   return word.word;
 };
 

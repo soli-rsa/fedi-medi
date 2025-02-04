@@ -11,7 +11,7 @@ export type KeyState = {
   state: TileState;
 };
 
-export type WordCategory = 'medical' | 'general' | 'mixed';
+export type WordCategory = 'medical' | 'general';
 
 export type WordDifficulty = 'easy' | 'moderate' | 'hard';
 
@@ -21,11 +21,7 @@ export interface Word {
   category: WordCategory;
 }
 
-export interface WordEntry {
-  word: string;
-  category: WordCategory;
-  definition: string;
-}
+export interface WordEntry extends Word {}
 
 export interface DictionaryResponse {
   word: string;

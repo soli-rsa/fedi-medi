@@ -1,6 +1,6 @@
-import { WordEntry } from "./types";
+import { Word } from "./types";
 
-export const generalWords: WordEntry[] = [
+export const generalWords: Word[] = [
   { 
     word: "SMILE", 
     definition: "A facial expression of happiness or pleasure", 
