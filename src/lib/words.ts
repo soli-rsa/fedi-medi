@@ -1,9 +1,16 @@
-import { WordEntry, DictionaryResponse, WordCategory } from './types';
+import { WordEntry, DictionaryResponse, WordCategory, TileState } from './types';
 import { medicalTerms } from './medical-terms';
+
+const MEDICAL_KEYWORDS = [
+  'disease', 'treatment', 'organ', 'cell', 'medical', 'health',
+  'body', 'patient', 'doctor', 'hospital', 'clinic', 'medicine',
+  'symptom', 'diagnosis', 'therapy', 'surgery'
+];
 
 export class WordService {
   private static instance: WordService;
   private usedWords: Set<string> = new Set();
+  private cache: Map<string, WordEntry> = new Map();
   
   private constructor() {}
   
@@ -14,8 +21,20 @@ export class WordService {
     return WordService.instance;
   }
 
+  private isMedicalWord(definition: string): boolean {
+    const lowerDef = definition.toLowerCase();
+    return MEDICAL_KEYWORDS.some(keyword => lowerDef.includes(keyword));
+  }
+
   async fetchWordDefinition(word: string): Promise<WordEntry | null> {
     try {
+      // Check cache first
+      const cached = this.cache.get(word);
+      if (cached) {
+        console.log('Retrieved from cache:', word);
+        return cached;
+      }
+
       const response = await fetch(
         `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`
       );
@@ -23,11 +42,20 @@ export class WordService {
       if (!response.ok) return null;
       
       const data: DictionaryResponse[] = await response.json();
-      return {
+      const definition = data[0]?.meanings[0]?.definitions[0]?.definition || 'No definition available';
+      
+      const category = this.isMedicalWord(definition) ? 'medical' : 'general';
+      const wordEntry: WordEntry = {
         word: word.toUpperCase(),
-        category: 'general',
-        definition: data[0]?.meanings[0]?.definitions[0]?.definition || 'No definition available'
+        category,
+        definition
       };
+
+      // Cache the result
+      this.cache.set(word, wordEntry);
+      console.log('Added to cache:', word, 'Category:', category);
+      
+      return wordEntry;
     } catch (error) {
       console.error('Error fetching word definition:', error);
       return null;
@@ -68,7 +96,7 @@ export class WordService {
     );
 
     if (availableWords.length === 0) {
-      this.usedWords.clear(); // Reset used words if all words have been used
+      this.usedWords.clear();
       return this.getRandomWord(category);
     }
 
