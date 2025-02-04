@@ -1,5 +1,6 @@
 import { WordEntry, DictionaryResponse, WordCategory, TileState } from './types';
 import { medicalTerms } from './medical-terms';
+import { generalWords } from './general-words';
 
 const MEDICAL_KEYWORDS = [
   'disease', 'treatment', 'organ', 'cell', 'medical', 'health',
@@ -26,42 +27,6 @@ export class WordService {
     return MEDICAL_KEYWORDS.some(keyword => lowerDef.includes(keyword));
   }
 
-  async fetchWordDefinition(word: string): Promise<WordEntry | null> {
-    try {
-      // Check cache first
-      const cached = this.cache.get(word);
-      if (cached) {
-        console.log('Retrieved from cache:', word);
-        return cached;
-      }
-
-      const response = await fetch(
-        `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`
-      );
-      
-      if (!response.ok) return null;
-      
-      const data: DictionaryResponse[] = await response.json();
-      const definition = data[0]?.meanings[0]?.definitions[0]?.definition || 'No definition available';
-      
-      const category = this.isMedicalWord(definition) ? 'medical' : 'general';
-      const wordEntry: WordEntry = {
-        word: word.toUpperCase(),
-        category,
-        definition
-      };
-
-      // Cache the result
-      this.cache.set(word, wordEntry);
-      console.log('Added to cache:', word, 'Category:', category);
-      
-      return wordEntry;
-    } catch (error) {
-      console.error('Error fetching word definition:', error);
-      return null;
-    }
-  }
-
   getRandomWord(category: WordCategory = 'medical'): WordEntry {
     let wordPool: WordEntry[] = [];
     
@@ -74,20 +39,14 @@ export class WordService {
         }));
         break;
       case 'general':
-        // For now, use medical terms as fallback
-        wordPool = medicalTerms.map(term => ({
+        wordPool = generalWords;
+        break;
+      default:
+        wordPool = [...medicalTerms.map(term => ({
           word: term.word,
           category: 'medical' as const,
           definition: term.definition
-        }));
-        break;
-      case 'mixed':
-        wordPool = medicalTerms.map(term => ({
-          word: term.word,
-          category: 'medical' as const,
-          definition: term.definition
-        }));
-        break;
+        })), ...generalWords];
     }
 
     // Filter out used words
@@ -105,7 +64,7 @@ export class WordService {
     ];
     
     this.usedWords.add(selectedWord.word);
-    console.log('Selected word:', selectedWord.word, 'Definition:', selectedWord.definition);
+    console.log('Selected word:', selectedWord.word, 'Category:', selectedWord.category, 'Definition:', selectedWord.definition);
     return selectedWord;
   }
 
@@ -137,7 +96,8 @@ export class WordService {
   }
 
   isValidWord(word: string): boolean {
-    return medicalTerms.some(term => term.word === word.toUpperCase());
+    const upperWord = word.toUpperCase();
+    return [...medicalTerms, ...generalWords].some(term => term.word === upperWord);
   }
 }
 
