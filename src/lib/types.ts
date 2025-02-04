@@ -13,6 +13,14 @@ export type KeyState = {
 
 export type WordCategory = 'medical' | 'general' | 'mixed';
 
+export type WordDifficulty = 'easy' | 'moderate' | 'hard';
+
+export interface Word {
+  word: string;
+  definition: string;
+  category: WordCategory;
+}
+
 export interface WordEntry {
   word: string;
   category: WordCategory;
