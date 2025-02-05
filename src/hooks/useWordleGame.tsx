@@ -7,7 +7,11 @@ import { loadStats, updateStats } from "@/lib/statistics";
 export const useWordleGame = () => {
   const { toast } = useToast();
   const [gameMode, setGameMode] = useState<WordCategory>('medical');
-  const [currentWord, setCurrentWord] = useState<WordEntry>(() => wordService.getRandomWord(gameMode));
+  const [currentWord, setCurrentWord] = useState<WordEntry>(() => {
+    const word = wordService.getRandomWord(gameMode);
+    console.log("Initial word selected:", word.word, "Mode:", gameMode);
+    return word;
+  });
   const [gameState, setGameState] = useState<GameState>({
     guesses: [],
     currentGuess: '',
@@ -16,26 +20,41 @@ export const useWordleGame = () => {
   const [keyStates, setKeyStates] = useState<KeyState[]>([]);
   const [stats, setStats] = useState(loadStats());
 
-  const startNewGame = () => {
-    const newWord = wordService.getRandomWord(gameMode);
-    setCurrentWord(newWord);
+  const resetGameState = () => {
     setGameState({
       guesses: [],
       currentGuess: '',
       gameStatus: 'playing',
     });
     setKeyStates([]);
-    console.log("New game started with word:", newWord.word, "Definition:", newWord.definition);
+    console.log("Game state reset completed");
+  };
+
+  const startNewGame = () => {
+    const newWord = wordService.getRandomWord(gameMode);
+    console.log("Starting new game with word:", newWord.word, "Mode:", gameMode);
+    setCurrentWord(newWord);
+    resetGameState();
   };
 
   const handleModeChange = (checked: boolean) => {
     const newMode = checked ? 'general' : 'medical';
+    console.log("Mode changing from", gameMode, "to", newMode);
     setGameMode(newMode);
+    
+    // Reset game state before changing mode
+    resetGameState();
+    
+    // Get new word for the new mode
+    const newWord = wordService.getRandomWord(newMode);
+    setCurrentWord(newWord);
+    
     toast({
       title: `Switched to ${newMode} mode`,
       description: `Now playing with ${newMode} terms`,
     });
-    startNewGame();
+    
+    console.log("Mode change completed. New word:", newWord.word);
   };
 
   const addLetter = (letter: string) => {
