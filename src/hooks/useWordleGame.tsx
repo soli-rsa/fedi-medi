@@ -108,6 +108,10 @@ export const useWordleGame = () => {
         title: "Congratulations!",
         description: `You found the word in ${newGuesses.length} tries!`,
       });
+      // Get a new word immediately after winning
+      const newWord = wordService.getRandomWord(gameMode);
+      console.log("New word selected after win:", newWord.word);
+      setCurrentWord(newWord);
     } else if (lost) {
       const newStats = updateStats(false, 6);
       setStats(newStats);
